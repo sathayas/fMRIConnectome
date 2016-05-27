@@ -15,7 +15,7 @@ def run_bet(fBrain, fThresh=0.3):
                       default is 0.5, this function uses 0.3 by default.
 
     Returns:
-          NONE
+          fBrain_bet: The file name of the brain-extracted T1 image
     '''
 
     # file name business
@@ -24,7 +24,7 @@ def run_bet(fBrain, fThresh=0.3):
     if tmpext == '.gz':
         # the extension is .nii.gz
         tmpfname, tmpext = os.path.splitext(tmpfname)
-    fOutBrain = os.path.join(WorkDir, tmpfname+'_brain') # output file name
+    fOutBrain = os.path.join(WorkDir, tmpfname+'_brain.nii.gz') # output file name
 
     # assemblying the command
     com_bet = 'bet ' + fBrain + ' ' + fOutBrain
@@ -32,3 +32,5 @@ def run_bet(fBrain, fThresh=0.3):
 
     # calling bet
     res = os.system(com_bet)
+
+    return fOutBrain
