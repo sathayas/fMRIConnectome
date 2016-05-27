@@ -208,11 +208,20 @@ def run_feat(fT1_brain, ffMRI, nVolDel=0):
                         The default is 0.
     
     Returns:
-          NONE
+          DirFeat:      The output .feat directory name
 
     '''
 
     fDesFile = make_feat_design(fT1_brain, ffMRI, nVolDel)
     com_feat = 'feat ' + fDesFile
     res = os.system(com_feat)
+    
+    # output directory name
+    WorkDir, fImg = os.path.split(os.path.abspath(ffMRI))
+    tmpfname, tmpext = os.path.splitext(fImg)
+    if tmpext == '.gz':
+        # the extension is .nii.gz
+        tmpfname, tmpext = os.path.splitext(tmpfname)
+    DirFeat = os.path.join(os.path.abspath(WorkDir), tmpfname+'.feat')
+    return DirFeat
 
