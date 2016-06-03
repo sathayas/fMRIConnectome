@@ -33,4 +33,4 @@ def run_bet(fBrain, fThresh=0.3):
     # calling bet
     res = os.system(com_bet)
 
-    return fOutBrain
+
