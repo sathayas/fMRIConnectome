@@ -15,7 +15,7 @@ def run_bet(fBrain, fThresh=0.3):
                       default is 0.5, this function uses 0.3 by default.
 
     Returns:
-          fBrain_bet: The file name of the brain-extracted T1 image
+          NONE
     '''
 
     # file name business
