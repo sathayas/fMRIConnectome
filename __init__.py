@@ -9,4 +9,6 @@ from .mask import reslice_to_fMRI, mask_parenchyma, mask_wm
 from .mask import mask_csf, mask_brain, mask_fmri, generate_mask
 from .extract_mean import extract_global
 from .regress import regress_global
+from .motion_scrub import calc_fd, scrub_motion
+
 
