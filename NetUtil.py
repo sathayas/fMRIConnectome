@@ -283,4 +283,3 @@ def net_builder_HardThE(R, NodeInd, E):
     # finally returning the resultant graph and the threshold
     return G, RTh
     
-
