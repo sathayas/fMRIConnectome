@@ -140,12 +140,26 @@ def load_corrmat_sparse(CorrDir, ffmri):
     # then returning
     return crtR, voxInd
 
-####################### Start from here ########################
+
 
 def net_builder_RankTh(R, NodeInd, d):
-    #
-    # a function to construct the network by the rank-based thresholding
-    # 
+    '''
+    a function to construct the network by the rank-based thresholding
+     
+    input parameters:
+          R:         A dense correlation matrix array.
+          NodeInd:   A list of nodes in the network.
+          d:         The rank threshold for the rank-based thresholding.
+
+    returns:
+          G:         The resulting graph (networkX format)
+          WorkR:     The correlation matrix with zeros for the elements
+                     corresponding to the edges in G. This updated correlaton
+                     matrix experdite the construction of networks if
+                     such networks are constructed sequentially in the
+                     increasing order of d.
+    '''
+
     # first, initialize the graph
     G = nx.Graph()
     G.add_nodes_from(NodeInd)
@@ -155,9 +169,9 @@ def net_builder_RankTh(R, NodeInd, d):
     for iRank in range(d):
         I = np.arange(NNodes)
         J = np.argmax(WorkR, axis=1)
-        # R has to be greater than zero
-        trI = [i for i in range(NNodes) if WorkR[i, J[i]]>0]
-        trJ = [J[i] for i in range(NNodes) if WorkR[i, J[i]]>0]
+        # R has to be non-zero
+        trI = [i for i in range(NNodes) if abs(WorkR[i, J[i]])>0]
+        trJ = [J[i] for i in range(NNodes) if abs(WorkR[i, J[i]])>0]
         # adding connections (for R>0)
         Elist = np.vstack((NodeInd[trI], NodeInd[trJ])).T 
         G.add_edges_from(Elist)
@@ -168,16 +182,27 @@ def net_builder_RankTh(R, NodeInd, d):
 
 
 def net_builder_HardTh(R, NodeInd, K):
-    #
-    # a function to construct the network by the hard-thresholding
-    # 
+    '''
+    a function to construct the network by the hard-thresholding.
+
+    input parameters:
+          R:         A dense correlation matrix array.
+          NodeInd:   A list of nodes in the network.
+          K:         The target K, the average connections at each node
+    
+    returns:
+          G:         The resulting graph (networkX format)
+          RTh:       The R-value of the threshold achieveing the target K.
+
+    '''
+    
     # first, initialize the graph
     G = nx.Graph()
     G.add_nodes_from(NodeInd)
     NNodes = R.shape[0]
     # upper triangle of the correlation matrix only
     I,J = np.triu_indices(NNodes,1)
-    VecR = R[I,J]
+    VecR = abs(R[I,J])   # good for both pos and neg correlations
     # the number of elements is too big, so we truncate it
     # first, find the appropriate threshold for R
     NthR = 0
@@ -185,7 +210,7 @@ def net_builder_HardTh(R, NodeInd, K):
     StepTh = 0.05
     while NthR<K*NNodes/2.0:
         tmpRth -= StepTh
-        #print 'Threshold = %.2f' % tmpRth
+        #print('Threshold = %.2f' % tmpRth)
         NthR = len(np.nonzero(VecR>tmpRth)[0])
     # second, truncate the variables
     IndVecR = np.nonzero(VecR>tmpRth)
@@ -208,17 +233,28 @@ def net_builder_HardTh(R, NodeInd, K):
 
 
 def net_builder_HardThE(R, NodeInd, E):
-    #
-    # a function to construct the network by the hard-thresholding
-    # with a number of edges specified
-    # 
+    '''
+    a function to construct the network by the hard-thresholding
+    with a number of edges specified.
+
+    input parameters:
+          R:         A dense correlation matrix array.
+          NodeInd:   A list of nodes in the network.
+          E:         The target E, the total number of edges
+    
+    returns:
+          G:         The resulting graph (networkX format)
+          RTh:       The R-value of the threshold achieveing the target E
+
+    '''
+
     # first, initialize the graph
     G = nx.Graph()
     G.add_nodes_from(NodeInd)
     NNodes = R.shape[0]
     # upper triangle of the correlation matrix only
     I,J = np.triu_indices(NNodes,1)
-    VecR = R[I,J]
+    VecR = abs(R[I,J])  # for both pos and neg correlations
     # the number of elements is too big, so we truncate it
     # first, find the appropriate threshold for R
     NthR = 0
@@ -226,7 +262,7 @@ def net_builder_HardThE(R, NodeInd, E):
     StepTh = 0.05
     while NthR<E:
         tmpRth -= StepTh
-        #print 'Threshold = %.2f' % tmpRth
+        print('Threshold = %.2f' % tmpRth)
         NthR = len(np.nonzero(VecR>tmpRth)[0])
     # second, truncate the variables
     IndVecR = np.nonzero(VecR>tmpRth)
@@ -247,26 +283,4 @@ def net_builder_HardThE(R, NodeInd, E):
     # finally returning the resultant graph and the threshold
     return G, RTh
     
-
-def save_net_npz(G, fOut):
-    #
-    # a function to write out a network as a binary npz file
-    # 
-    NodeList = G.nodes()
-    EdgeList = G.edges()
-    np.savez(fOut, NodeList=NodeList, EdgeList=EdgeList)
-
-
-def load_net_npz(fNet):
-    #
-    # a function to load a network as a binary npz file
-    # 
-    infile = np.load(fNet)
-    NodeList = infile['NodeList']
-    EdgeList = infile['EdgeList']
-    # organizing into a network
-    G = nx.Graph()
-    G.add_nodes_from(NodeList)
-    G.add_edges_from(EdgeList)
-    return G
 
