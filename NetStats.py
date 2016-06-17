@@ -164,7 +164,7 @@ def calc_LDEglob_node(G, xNode):
     indZ = np.nonzero(np.array(Dx)==0)[0]
     nzDx = np.delete(Dx, indZ)
     if len(nzDx)>0:
-        EglobSum = (1.0/(NNodes-1.0)) * np.sum(1.0/nzDx)
+        EglobSum = np.sum(1.0/nzDx)
         L = np.mean(nzDx)
         D = np.max(nzDx)
     else:
@@ -210,6 +210,7 @@ def calc_LDEglob_subnet(G):
 def calc_LDEglob_net(G):
     '''
     This is a legacy function and its purpose is unclear
+    (perhaps to speed up calculation by calculating L, D, and Eglob together?)
     '''
     # initializing the recorders
     subL = []
@@ -331,32 +332,53 @@ def eloc_net(G):
     return Eloc, sEloci, sNodes
 
 
+
 def GCSize(G):
-    #
-    # A function to caluclate the giant connected component size
-    #
+    '''
+    A function to caluclate the giant connected component size
+    
+    input parameters:
+          G:       A graph in networkX format.
+
+    returns:
+          GC:      The giant component size (in terms of the number of nodes)
+    '''
+
     cc = sorted(nx.connected_components(G), key = len, reverse=True)
     GC = len(cc[0])
     return GC
 
 
+
 def degree_node(G):
-    #
-    # A function to calculate node degree
-    #
+    '''
+    A function to calculate node degree
+
+    input parameters:
+          G:       A graph in networkX format.
+
+    returns:
+          K:       The average node degree.
+          sKi:     Node degrees for individual nodes.
+          sNodes:  The list of nodes, in the same order as sKi.
+    '''
+
     Kinfo = G.degree()
-    Nodes = Kinfo.keys()
-    Ki = Kinfo.values()
+    Nodes = list(Kinfo.keys())
+    Ki = list(Kinfo.values())
     K = np.mean(Ki)
     # sorting the node degrees
     sNodes, sKi = sort_nodestat(Nodes, Ki)
     return K, sKi, sNodes
 
 
+
 def sort_nodestat(NodeList, Stats):
-    #
-    # A function to sort node stats by ROI number
-    #
+    '''
+    A function to sort node stats by ROI number
+    
+    This is a function used internally.
+    '''
     iNode = [int(i) for i in NodeList]
     zipstat = zip(iNode, Stats)
     zipsstat = sorted(zipstat, key = lambda t: t[0])
@@ -365,9 +387,23 @@ def sort_nodestat(NodeList, Stats):
 
 
 def write_nodestat_nii(NodeList, Stats, fHDR, fOut):
-    #
-    # A function to write out node stats as an image
-    #
+    '''
+    A function to write out node stats as an image
+    
+    input parameters:
+          NodeList:    A list of nodes
+          Stats:       A list of network stats, in the same order as NodeList
+          fHDR:        An image whose header information will be used to write out
+                       an image.
+          fOut:        The file name for the output image
+
+    returns:
+          NONE
+    
+    output:
+          This function generates an image with the file name specified by fOut.
+    '''
+
     # loading the image data
     img_data = nib.load(fHDR)
     X_data = img_data.get_data()
