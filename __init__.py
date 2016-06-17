@@ -15,6 +15,7 @@ from .NetUtil import save_sparse_csr, load_sparse_csr, load_corrmat_sparse
 from .NetUtil import net_builder_RankTh, net_builder_HardTh, net_builder_HardThE
 from .NetStats import eglob_node, eglob_net, calc_L, calc_C, calc_D
 from .NetStats import calc_LDEglob_node, calc_LDEglob_subnet, calc_LDEglob_net
-from .NetStats import subgraph, eloc_node, eloc_net
+from .NetStats import subgraph, eloc_node, eloc_net, GCSize, degree_node
+from .NetStats import write_nodestat_nii
 
 
