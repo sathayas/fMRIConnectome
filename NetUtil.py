@@ -33,6 +33,8 @@ def save_sparse_csr(filename,array):
     np.savez(filename,data = array.data ,indices=array.indices,
              indptr =array.indptr, shape=array.shape )
 
+
+
 def load_sparse_csr(filename):
     '''
     A function to load a sparse matrix as a sparse array.
@@ -120,7 +122,7 @@ def load_corrmat_sparse(CorrDir, ffmri):
     thuCorr = [] # clearing the original correlation matrix to make more room.
 
     # find if there is any row with all zeros
-    maxRow = np.max(tR, axis=1)
+    maxRow = np.max(abs(tR), axis=1)
     zeroRow = np.nonzero(maxRow==0)[0]
 
     # delete the zero rows / columns
@@ -165,13 +167,13 @@ def net_builder_RankTh(R, NodeInd, d):
     G.add_nodes_from(NodeInd)
     NNodes = R.shape[0]
     # then add edges
-    WorkR = np.array(R)  # the working copy of R
+    WorkR = abs(np.array(R))  # the working copy of R
     for iRank in range(d):
         I = np.arange(NNodes)
         J = np.argmax(WorkR, axis=1)
         # R has to be non-zero
-        trI = [i for i in range(NNodes) if abs(WorkR[i, J[i]])>0]
-        trJ = [J[i] for i in range(NNodes) if abs(WorkR[i, J[i]])>0]
+        trI = [i for i in range(NNodes) if WorkR[i, J[i]]>0]
+        trJ = [J[i] for i in range(NNodes) if WorkR[i, J[i]]>0]
         # adding connections (for R>0)
         Elist = np.vstack((NodeInd[trI], NodeInd[trJ])).T 
         G.add_edges_from(Elist)
