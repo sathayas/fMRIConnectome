@@ -17,5 +17,7 @@ from .NetStats import eglob_node, eglob_net, calc_L, calc_C, calc_D
 from .NetStats import calc_LDEglob_node, calc_LDEglob_subnet, calc_LDEglob_net
 from .NetStats import subgraph, eloc_node, eloc_net, GCSize, degree_node
 from .NetStats import write_nodestat_nii
+from .net_modules import run_Louvain
+
 
 
