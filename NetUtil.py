@@ -222,11 +222,11 @@ def net_builder_HardTh(R, NodeInd, K, cType=1):
     I,J = np.triu_indices(NNodes,1)
     # creating a vector of correlation coefficients, depending on cType
     if cType==1:
-        VecR = R[I,J]
+        VecR = np.squeeze(np.array(R[I,J]))
     elif cType==0:
-        VecR = abs(R[I,J])
+        VecR = np.squeeze(np.array(abs(R[I,J])))
     elif cType==-1:
-        VecR = -R[I,J]
+        VecR = np.squeeze(np.array(-R[I,J]))
     # the number of elements is too big, so we truncate it
     # first, find the appropriate threshold for R
     NthR = 0
@@ -285,11 +285,11 @@ def net_builder_HardThE(R, NodeInd, E, cType=1):
     I,J = np.triu_indices(NNodes,1)
     # creating a vector of correlation coefficients, depending on cType
     if cType==1:
-        VecR = R[I,J]
+        VecR = np.squeeze(np.array(R[I,J]))
     elif cType==0:
-        VecR = abs(R[I,J])
+        VecR = np.squeeze(np.array(abs(R[I,J])))
     elif cType==-1:
-        VecR = -R[I,J]
+        VecR = np.squeeze(np.array(-R[I,J]))
     # the number of elements is too big, so we truncate it
     # first, find the appropriate threshold for R
     NthR = 0
@@ -297,7 +297,7 @@ def net_builder_HardThE(R, NodeInd, E, cType=1):
     StepTh = 0.05
     while NthR<E:
         tmpRth -= StepTh
-        print('Threshold = %.2f' % tmpRth)
+        #print('Threshold = %.2f' % tmpRth)
         NthR = len(np.nonzero(VecR>tmpRth)[0])
     # second, truncate the variables
     IndVecR = np.nonzero(VecR>tmpRth)
