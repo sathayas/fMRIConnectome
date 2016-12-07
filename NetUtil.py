@@ -144,7 +144,7 @@ def load_corrmat_sparse(CorrDir, ffmri):
 
 
 
-def net_builder_RankTh(R, NodeInd, d):
+def net_builder_RankTh(R, NodeInd, d, cType=1):
     '''
     a function to construct the network by the rank-based thresholding
      
@@ -152,6 +152,11 @@ def net_builder_RankTh(R, NodeInd, d):
           R:         A dense correlation matrix array.
           NodeInd:   A list of nodes in the network.
           d:         The rank threshold for the rank-based thresholding.
+          cType:     Type of functional connectivity. 
+                        1:  Positive correlation only
+                        0:  Both positive and negative correlations
+                        -1: Negative correlation only
+                     The default is 1 (i.e., positive correlation only).
 
     returns:
           G:         The resulting graph (networkX format)
@@ -166,8 +171,14 @@ def net_builder_RankTh(R, NodeInd, d):
     G = nx.Graph()
     G.add_nodes_from(NodeInd)
     NNodes = R.shape[0]
+    # the working copy of R, depending on the connectivity type
+    if cType==1:
+        WorkR = np.copy(R)
+    elif cType==0:
+        WorkR = abs(np.copy(R))
+    elif cType==-1:
+        WorkR = np.copy(-R)
     # then add edges
-    WorkR = abs(np.array(R))  # the working copy of R
     for iRank in range(d):
         I = np.arange(NNodes)
         J = np.argmax(WorkR, axis=1)
@@ -183,7 +194,7 @@ def net_builder_RankTh(R, NodeInd, d):
 
 
 
-def net_builder_HardTh(R, NodeInd, K):
+def net_builder_HardTh(R, NodeInd, K, cType=1):
     '''
     a function to construct the network by the hard-thresholding.
 
@@ -191,6 +202,11 @@ def net_builder_HardTh(R, NodeInd, K):
           R:         A dense correlation matrix array.
           NodeInd:   A list of nodes in the network.
           K:         The target K, the average connections at each node
+          cType:     Type of functional connectivity. 
+                        1:  Positive correlation only
+                        0:  Both positive and negative correlations
+                        -1: Negative correlation only
+                     The default is 1 (i.e., positive correlation only).
     
     returns:
           G:         The resulting graph (networkX format)
@@ -204,7 +220,13 @@ def net_builder_HardTh(R, NodeInd, K):
     NNodes = R.shape[0]
     # upper triangle of the correlation matrix only
     I,J = np.triu_indices(NNodes,1)
-    VecR = abs(R[I,J])   # good for both pos and neg correlations
+    # creating a vector of correlation coefficients, depending on cType
+    if cType==1:
+        VecR = R[I,J]
+    elif cType==0:
+        VecR = abs(R[I,J])
+    elif cType==-1:
+        VecR = -R[I,J]
     # the number of elements is too big, so we truncate it
     # first, find the appropriate threshold for R
     NthR = 0
@@ -234,7 +256,7 @@ def net_builder_HardTh(R, NodeInd, K):
     return G, RTh
 
 
-def net_builder_HardThE(R, NodeInd, E):
+def net_builder_HardThE(R, NodeInd, E, cType=1):
     '''
     a function to construct the network by the hard-thresholding
     with a number of edges specified.
@@ -243,6 +265,11 @@ def net_builder_HardThE(R, NodeInd, E):
           R:         A dense correlation matrix array.
           NodeInd:   A list of nodes in the network.
           E:         The target E, the total number of edges
+          cType:     Type of functional connectivity. 
+                        1:  Positive correlation only
+                        0:  Both positive and negative correlations
+                        -1: Negative correlation only
+                     The default is 1 (i.e., positive correlation only).
     
     returns:
           G:         The resulting graph (networkX format)
@@ -256,7 +283,13 @@ def net_builder_HardThE(R, NodeInd, E):
     NNodes = R.shape[0]
     # upper triangle of the correlation matrix only
     I,J = np.triu_indices(NNodes,1)
-    VecR = abs(R[I,J])  # for both pos and neg correlations
+    # creating a vector of correlation coefficients, depending on cType
+    if cType==1:
+        VecR = R[I,J]
+    elif cType==0:
+        VecR = abs(R[I,J])
+    elif cType==-1:
+        VecR = -R[I,J]
     # the number of elements is too big, so we truncate it
     # first, find the appropriate threshold for R
     NthR = 0
