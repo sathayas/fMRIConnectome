@@ -12,7 +12,7 @@ import nibabel as nib
 import networkx as nx
 
 
-def extract_ts(ffMRI, fAtlas, roiMin=-1, roiMax=-1):
+def extract_roits(ffMRI, fAtlas, roiMin=-1, roiMax=-1):
     '''
     A function to extract the average ROI time series from 4D fMRI
     data.
