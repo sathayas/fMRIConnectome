@@ -318,3 +318,35 @@ def net_builder_HardThE(R, NodeInd, E, cType=1):
     # finally returning the resultant graph and the threshold
     return G, RTh
     
+
+def adjlist2gexf(fAdjlist, bIntNode=1):
+    '''
+    Converts a graph in the adjacency list format to the GEXF format.
+
+    input parameters:
+          fAdjlist:   The file name of the adjacency list
+          bIntNode:   Indicates if the node type is integer. The default is 1
+                      (i.e., nodes are interger type).
+    
+    returns:
+          None
+
+    output:
+          This function generates an GEXF format file with the same name the 
+          input file, with .gexf extension.
+
+    '''
+    # first, loading the graph
+    if bIntNode==1:
+        G = nx.read_adjlist(fAdjlist, nodetype=int)
+    else:
+        G = nx.read_adjlist(fAdjlist)
+
+    # the output file name
+    (fOutRoot,tmpExt) = os.path.splitext(fAdjlist)
+    fOut = fOutRoot + '.gexf'
+
+    # writing out
+    nx.write_gexf(G, fOut)
+
+
