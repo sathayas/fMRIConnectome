@@ -111,9 +111,15 @@ def calc_C(G):
           C:      The average clustering coefficient for the entire network.
     '''
 
-    Ci = list(nx.clustering(G).values())
+    dictC = nx.clustering(G)
+    Ci = []
+    NodeInd = []
+    for ikey, ivalue in dictC.items():
+        NodeInd.append(ikey)
+        Ci.append(ivalue)
     C = np.mean(Ci)
-    return C
+    sNodeInd, sCi = sort_nodestat(NodeInd,Ci)
+    return C, sCi, sNodeInd
 
 
 
