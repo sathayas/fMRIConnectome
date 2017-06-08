@@ -26,7 +26,24 @@ def find_TR(ffMRI):
     return TR
 
     
+def find_nVoxels(ffMRI):
+    '''
+    a function to calculate the total number of voxels from a 4D fMRI data
 
+    Input Parameter:
+          fFMRI:    The file name for 4D fMRI data
+    
+    Returns:
+          nVox:     Total number of voxels
+    '''
+    fslInfo = subprocess.check_output('fslinfo ' + ffMRI, shell=True)
+    fslDimInfo = fslInfo.decode('utf-8').split()
+    dimX = int(fslDimInfo[fslDimInfo.index('dim1') + 1])
+    dimY = int(fslDimInfo[fslDimInfo.index('dim2') + 1])
+    dimZ = int(fslDimInfo[fslDimInfo.index('dim3') + 1])
+    dimT = int(fslDimInfo[fslDimInfo.index('dim4') + 1])
+    return dimX*dimY*dimZ*dimT
+     
 
 def make_feat_design(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     '''
@@ -161,13 +178,8 @@ def make_feat_design(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     # highpass filter cutoff
     DesFile.write("set fmri(paradigm_hp) %.2f\n" % sHiPass)
     # number of voxels
-    fslInfo = subprocess.check_output('fslinfo ' + ffMRI, shell=True)
-    fslDimInfo = fslInfo.decode('utf-8').split()
-    dimX = int(fslDimInfo[fslDimInfo.index('dim1') + 1])
-    dimY = int(fslDimInfo[fslDimInfo.index('dim2') + 1])
-    dimZ = int(fslDimInfo[fslDimInfo.index('dim3') + 1])
-    dimT = int(fslDimInfo[fslDimInfo.index('dim4') + 1])
-    DesFile.write("set fmri(totalVoxels) %d\n" % (dimX*dimY*dimZ*dimT))
+    nVox = find_nVoxels(ffMRI)
+    DesFile.write("set fmri(totalVoxels) %d\n" % nVox)
     # and more parameters ...
     DesFile.write("set fmri(ncopeinputs) 0\n")
     # fmri time series
@@ -212,7 +224,7 @@ def make_feat_design(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     DesFile.close()
     return fDesFile
 
-def run_feat(fT1_brain, ffMRI, nVolDel=0):
+def run_feat(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     '''
     The wrapper function to run feat to normalized T1 to MNI
  
@@ -221,13 +233,17 @@ def run_feat(fT1_brain, ffMRI, nVolDel=0):
           ffMRI:        The 4D fMRI image
           nVolDel:      The number of first volumes to be deleted.
                         The default is 0.
+          bNorm:        The flag for normalization to the standard space. It can take
+                        True or False. If True (default), then the structural will be
+                        normalized to the standard template. If False, then the 
+                        structural will not be normalized.
     
     Returns:
           DirFeat:      The output .feat directory name
 
     '''
 
-    fDesFile = make_feat_design(fT1_brain, ffMRI, nVolDel)
+    fDesFile = make_feat_design(fT1_brain, ffMRI, nVolDel, bNorm)
     com_feat = 'feat ' + fDesFile
     res = os.system(com_feat)
     
