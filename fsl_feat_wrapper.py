@@ -28,7 +28,7 @@ def find_TR(ffMRI):
     
 
 
-def make_feat_design(fT1_brain, ffMRI, nVolDel=0):
+def make_feat_design(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     '''
     this function creates a design file (design.fsf) for feat
     
@@ -37,6 +37,10 @@ def make_feat_design(fT1_brain, ffMRI, nVolDel=0):
           ffMRI:        The 4D fMRI image
           nVolDel:      The number of first volumes to be deleted.
                         The default is 0.
+          bNorm:        The flag for normalization to the standard space. It can take
+                        True or False. If True (default), then the structural will be
+                        normalized to the standard template. If False, then the 
+                        structural will not be normalized.
     
     Returns:
           fDes:         The design file name
@@ -141,7 +145,11 @@ def make_feat_design(fT1_brain, ffMRI, nVolDel=0):
     DesFile.write("set fmri(reghighres_yn) 1\n")
     DesFile.write("set fmri(reghighres_search) 90\n")
     DesFile.write("set fmri(reghighres_dof) 6\n")
-    DesFile.write("set fmri(regstandard_yn) 1\n")
+    # whether to normalize to the standard space
+    if bNorm:
+        DesFile.write("set fmri(regstandard_yn) 1\n")
+    else:
+        DesFile.write("set fmri(regstandard_yn) 0\n")
     DesFile.write("set fmri(alternateReference_yn) 0\n")
     # fsl's MNI template image
     DesFile.write("set fmri(regstandard) \"%s\"\n" % fMNI)
@@ -152,14 +160,21 @@ def make_feat_design(fT1_brain, ffMRI, nVolDel=0):
     DesFile.write("set fmri(regstandard_nonlinear_warpres) 10\n")
     # highpass filter cutoff
     DesFile.write("set fmri(paradigm_hp) %.2f\n" % sHiPass)
+    # number of voxels
+    fslInfo = subprocess.check_output('fslinfo ' + ffMRI, shell=True)
+    fslDimInfo = fslInfo.decode('utf-8').split()
+    dimX = int(fslDimInfo[fslDimInfo.index('dim1') + 1])
+    dimY = int(fslDimInfo[fslDimInfo.index('dim2') + 1])
+    dimZ = int(fslDimInfo[fslDimInfo.index('dim3') + 1])
+    dimT = int(fslDimInfo[fslDimInfo.index('dim4') + 1])
+    DesFile.write("set fmri(totalVoxels) %d\n" % (dimX*dimY*dimZ*dimT))
     # and more parameters ...
-    DesFile.write("set fmri(totalVoxels) 24371200\n")
     DesFile.write("set fmri(ncopeinputs) 0\n")
     # fmri time series
     DesFile.write("set feat_files(1) \"%s\"\n" % os.path.abspath(ffMRI))
     # and more parameters ...
     DesFile.write("set fmri(confoundevs) 0\n")
-    # T1 extracted brain image
+    # T1 brain extracted image
     DesFile.write("set highres_files(1) \"%s\"\n" % os.path.abspath(fT1_brain))
     # and more parameters ...
     DesFile.write("set fmri(evtitle1) \"\"\n")
