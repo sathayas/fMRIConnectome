@@ -198,36 +198,34 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     for iEV in range(nEV):
         indEV = str(iEV + 1)
         nameEV = 'EV' + indEV
-        DesFile.write("set fmri(evtitle" + indEV +") \"" + nameEV + "\"\n")
-
-        ####### Start from Here ######
-        
-    DesFile.write("set fmri(evtitle1) \"\"\n")
-    DesFile.write("set fmri(shape1) 0\n")
-    DesFile.write("set fmri(convolve1) 2\n")
-    DesFile.write("set fmri(convolve_phase1) 0\n")
-    DesFile.write("set fmri(tempfilt_yn1) 1\n")
-    DesFile.write("set fmri(deriv_yn1) 1\n")
-    DesFile.write("set fmri(skip1) 0\n")
-    DesFile.write("set fmri(off1) 30\n")
-    DesFile.write("set fmri(on1) 30\n")
-    DesFile.write("set fmri(phase1) 0\n")
-    DesFile.write("set fmri(stop1) -1\n")
-    DesFile.write("set fmri(gammasigma1) 3\n")
-    DesFile.write("set fmri(gammadelay1) 6\n")
-    DesFile.write("set fmri(ortho1.0) 0\n")
-    DesFile.write("set fmri(ortho1.1) 0\n")
+        DesFile.write("set fmri(evtitle" + indEV + ") \"" + nameEV + "\"\n")
+        DesFile.write("set fmri(shape" + indEV + ") 3\n")
+        DesFile.write("set fmri(convolve" + indEV + ") 3\n")
+        DesFile.write("set fmri(convolve_phase" + indEV + ") 0\n")
+        DesFile.write("set fmri(tempfilt_yn" + indEV + ") 1\n")
+        DesFile.write("set fmri(deriv_yn" + indEV + ") 1\n")
+        DesFile.write("set fmri(custom" + indEV + ") \"" + EVFileList[iEV]
+                      + "\"\n")
+        for jEV in range(nEV+1):
+            DesFile.write("set fmri(ortho" + indEV + "." + str(jEV) + ") 0\n")
+    # Parameters for a dummy contrast
     DesFile.write("set fmri(con_mode_old) orig\n")
     DesFile.write("set fmri(con_mode) orig\n")
-    DesFile.write("set fmri(conpic_real.1) 1\n")
+    DesFile.write("set fmri(conpic_real.1) 0\n")
     DesFile.write("set fmri(conname_real.1) \"\"\n")
-    DesFile.write("set fmri(con_real1.1) 1\n")
-    DesFile.write("set fmri(con_real1.2) 0\n")
-    DesFile.write("set fmri(conpic_orig.1) 1\n")
+    # dummy contrast vector (real)
+    for iCol in range(2*nEV):
+        DesFile.write("set fmri(con_real1." + str(iCol+1) + ") 1\n")
+    # more parameters for the dummy contrast
+    DesFile.write("set fmri(conpic_orig.1) 0\n")
     DesFile.write("set fmri(conname_orig.1) \"\"\n")
-    DesFile.write("set fmri(con_orig1.1) 1\n")
+    # dummy contrast vector (orig)
+    for iCol in range(nEV):
+        DesFile.write("set fmri(con_orig1." + str(iCol+1) + ") 1\n")
+    # Other contrast related parameters
     DesFile.write("set fmri(conmask_zerothresh_yn) 0\n")
     DesFile.write("set fmri(conmask1_1) 0\n")
+    # options not appearing on the GUI
     DesFile.write("set fmri(alternative_mask) \"\"\n")
     DesFile.write("set fmri(init_initial_highres) \"\"\n")
     DesFile.write("set fmri(init_highres) \"\"\n")
