@@ -5,6 +5,7 @@ from .fsl_feat_wrapper import run_feat, make_feat_design
 from .warp_fmri import run_warp, apply_warp, reslice_fmri
 from .bp_filter import run_bp, bandpass_fMRI
 from .fsl_fast_wrapper import run_fast
+from .fsl_fast_wrapper import make_feat_model_design
 from .mask import reslice_to_fMRI, mask_parenchyma, mask_wm
 from .mask import mask_csf, mask_brain, mask_fmri, generate_mask
 from .extract_mean import extract_global
@@ -20,6 +21,7 @@ from .NetStats import subgraph, eloc_node, eloc_net, GCSize, degree_node
 from .NetStats import write_nodestat_nii
 from .net_modules import run_Louvain
 from .ROINetUtil import extract_roits
+
 
 
 
