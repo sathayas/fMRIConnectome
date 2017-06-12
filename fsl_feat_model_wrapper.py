@@ -69,12 +69,15 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
 
     # file name business to figure out the location of the temporary design file
     WorkDir, fImg = os.path.split(os.path.abspath(ffMRI))
+    OutDir = os.path.join(WorkDir, 'design_stats') # temporary output directory
+    if not os.path.exists(OutDir):  # if the output directory doesnt exist, make one
+        os.makedirs(OutDir)
     tmpfname, tmpext = os.path.splitext(fImg)
     if tmpext == '.gz':
         # the extension is .nii.gz
         tmpfname, tmpext = os.path.splitext(tmpfname)
     tmpfname = tmpfname + '_stats'
-    fDesFile = os.path.join(WorkDir, 'design_' + tmpfname + '.fsf')
+    fDesFile = os.path.join(OutDir, 'design_' + tmpfname + '.fsf')
 
     # MNI template location 
     DirFSL = os.environ['FSLDIR'] # getting the FSL directory from the environment variable
@@ -235,7 +238,8 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     DesFile.close()
     return fDesFile
 
-def run_feat(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
+##### START FROM HERE #####
+def run_feat_model(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     '''
     The wrapper function to run feat to normalized T1 to MNI
  
