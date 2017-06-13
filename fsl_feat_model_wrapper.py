@@ -294,6 +294,42 @@ def feat_model_matrix(fMatFile):
                         P corresponds to the number of regressors. P equals 
                         the number of EVs and their derivatives. Thus P is 
                         twice the number of EVs.
+                        The column order is as follows:
+                             EV1   Column 0
+                             EV1'  Column 1
+                             EV2   Column 2
+                             EV2'  Column 3
+                             ....
+                        And so on. Here, (') denotes the derivative.
 
     '''
+    # open the file
+    f = open(fMatFile, 'r')
+    
+    # reading the header stuff. The last line is marked by /Matrix
+    line = f.readline()
+    while 'Matrix' not in line:
+        line = f.readline()
+
+    # reading the first row of the data matrix
+    line = f.readline()
+    row = [float(x) for x in line.split()]
+    DesMat = np.array(row)
+
+    # reading the rest of the data matrix
+    line = f.readline()
+    while line:
+        row = [float(x) for x in line.split()]
+        rowMat = np.array(row)
+        DesMat = np.vstack((DesMat,rowMat))
+        line = f.readline()
+
+    # close the file
+    f.close()
+
+    # now rectifying the matrix
+    DesMat[DesMat<0] = 0
+
+    # and returning the matrix
+    return DesMat
 
