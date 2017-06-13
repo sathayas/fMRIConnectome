@@ -21,6 +21,8 @@ from .NetStats import write_nodestat_nii
 from .net_modules import run_Louvain
 from .ROINetUtil import extract_roits
 from .fsl_feat_model_wrapper import make_feat_model_design, run_feat_model
+from .fsl_feat_model_wrapper import feat_model_matrix
+
 
 
 
