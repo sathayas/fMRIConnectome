@@ -205,7 +205,7 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
         DesFile.write("set fmri(shape" + indEV + ") 3\n")
         DesFile.write("set fmri(convolve" + indEV + ") 3\n")
         DesFile.write("set fmri(convolve_phase" + indEV + ") 0\n")
-        DesFile.write("set fmri(tempfilt_yn" + indEV + ") 1\n")
+        DesFile.write("set fmri(tempfilt_yn" + indEV + ") 0\n")
         DesFile.write("set fmri(deriv_yn" + indEV + ") 1\n")
         DesFile.write("set fmri(custom" + indEV + ") \"" + EVFileList[iEV]
                       + "\"\n")
