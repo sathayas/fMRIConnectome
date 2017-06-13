@@ -238,36 +238,32 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     DesFile.close()
     return fDesFile
 
-##### START FROM HERE #####
-def run_feat_model(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
+
+def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     '''
-    The wrapper function to run feat to normalized T1 to MNI
+    The wrapper function to run feat model to create files associated with GLM.
  
-   Input Parameters:
+    Input Parameters:
           fT1_brain:    The brain extracted T1-weighted image
           ffMRI:        The 4D fMRI image
+          EVFileList:   A list of EV timing files (in 3 column format).
+                        Each element is a file name, with an absolute path.
           nVolDel:      The number of first volumes to be deleted.
                         The default is 0.
-          bNorm:        The flag for normalization to the standard space. It can take
-                        True or False. If True (default), then the structural will be
-                        normalized to the standard template. If False, then the 
                         structural will not be normalized.
     
     Returns:
-          DirFeat:      The output .feat directory name
+          DirFeatModel: The output directory name where the output files are
+                        found.
 
     '''
 
-    fDesFile = make_feat_design(fT1_brain, ffMRI, nVolDel, bNorm)
-    com_feat = 'feat ' + fDesFile
+    fDesFile = make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0)
+    fDesFileBase, fDesFileExt = os.path.splitext(fDesFile)
+    com_feat = 'feat_model ' + fDesFileBase
     res = os.system(com_feat)
     
     # output directory name
-    WorkDir, fImg = os.path.split(os.path.abspath(ffMRI))
-    tmpfname, tmpext = os.path.splitext(fImg)
-    if tmpext == '.gz':
-        # the extension is .nii.gz
-        tmpfname, tmpext = os.path.splitext(tmpfname)
-    DirFeat = os.path.join(os.path.abspath(WorkDir), tmpfname+'.feat')
+    DirFeat, fName = os.path.split(os.path.abspath(fDesFile))
     return DirFeat
 
