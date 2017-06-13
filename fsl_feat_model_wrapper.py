@@ -56,8 +56,13 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
           EVFileList:   A list of EV timing files (in 3 column format).
                         Each element is a file name, with an absolute path.
           nVolDel:      The number of first volumes to be deleted.
-                        The default is 0.
-                        structural will not be normalized.
+                        The default is 0. 
+
+          Since the main goal of this function is to create a design file for 
+          a GLM model, the only relevant information is the list of EV timing
+          information files. All the other information is used as place holders
+          in the design file, and does not affect the GLM model.
+
     
     Returns:
           fDes:         The design file name
@@ -250,7 +255,11 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
                         Each element is a file name, with an absolute path.
           nVolDel:      The number of first volumes to be deleted.
                         The default is 0.
-                        structural will not be normalized.
+
+          Since the main goal of this function is to create files associated with 
+          a GLM model, the only relevant information is the list of EV timing
+          information files. All the other information is used as place holders
+          in the design file, and does not affect the GLM model.
     
     Returns:
           DirFeatModel: The output directory name where the output files are
@@ -266,4 +275,25 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     # output directory name
     DirFeat, fName = os.path.split(os.path.abspath(fDesFile))
     return DirFeat
+
+
+def feat_model_matrix(fMatFile):
+    '''
+    A program to read a GLM design matrix file, and returns as an array. In the
+    process, the design matrix is RECTIFIED (expression by Whitfiled-Gabrieli,
+    only the positive portion is returned while negative portion is zeroed).
+
+
+    Input Parameters:
+          fMatFile:     The file name of the GLM design matrix file generated
+                        by FSL's feat_model function.
+
+    Returns:
+          DesMat:       An T x P array of the design matrix in an array. 
+                        T corresponds to the number of time points.
+                        P corresponds to the number of regressors. P equals 
+                        the number of EVs and their derivatives. Thus P is 
+                        twice the number of EVs.
+
+    '''
 
