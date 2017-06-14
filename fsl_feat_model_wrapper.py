@@ -244,39 +244,6 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     return fDesFile
 
 
-def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
-    '''
-    The wrapper function to run feat model to create files associated with GLM.
- 
-    Input Parameters:
-          fT1_brain:    The brain extracted T1-weighted image
-          ffMRI:        The 4D fMRI image
-          EVFileList:   A list of EV timing files (in 3 column format).
-                        Each element is a file name, with an absolute path.
-          nVolDel:      The number of first volumes to be deleted.
-                        The default is 0.
-
-          Since the main goal of this function is to create files associated with 
-          a GLM model, the only relevant information is the list of EV timing
-          information files. All the other information is used as place holders
-          in the design file, and does not affect the GLM model.
-    
-    Returns:
-          DirFeatModel: The output directory name where the output files are
-                        found.
-
-    '''
-
-    fDesFile = make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0)
-    fDesFileBase, fDesFileExt = os.path.splitext(fDesFile)
-    com_feat = 'feat_model ' + fDesFileBase
-    res = os.system(com_feat)
-    
-    # output directory name
-    DirFeat, fName = os.path.split(os.path.abspath(fDesFile))
-    return DirFeat
-
-
 def feat_model_matrix(fMatFile):
     '''
     A program to read a GLM design matrix file, and returns as an array. In the
@@ -332,4 +299,70 @@ def feat_model_matrix(fMatFile):
 
     # and returning the matrix
     return DesMat
+
+
+def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
+    '''
+    The wrapper function to run feat_model to create a GLM model and saves it 
+    as a matrix (both in .npz and .txt).
+
+    Input Parameters:
+          fT1_brain:    The brain extracted T1-weighted image
+          ffMRI:        The 4D fMRI image. 
+          EVFileList:   A list of EV timing files (in 3 column format).
+                        Each element is a file name, with an absolute path.
+          nVolDel:      The number of first volumes to be deleted.
+                        The default is 0. 
+
+          The model is 
+
+    
+    Returns:
+          None
+
+    
+    Outputs:
+          The program writes the following files in the .feat directory associated
+          with this fMRI data.
+                GLM_model.txt:     The GLM model design matrix as a text file
+                GLM_model.npz:     The GLM model design matrix as an .npz file, with
+                                   the variable X as the design matrix.
+    '''
+
+    # creating the design file and running it
+    fDesFile = make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0)
+    fDesFileBase, fDesFileExt = os.path.splitext(fDesFile)
+    com_feat = 'feat_model ' + fDesFileBase
+    res = os.system(com_feat)
+    
+    # the directory and file business
+    DirModel, fName = os.path.split(os.path.abspath(fDesFile))
+    tmpPath, tmpExt = os.path.splitext(os.path.abspath(fDesFile))
+    fDesMat = tmpPath + '.mat'
+
+    # the .feat directory
+    WorkDir, fImg = os.path.split(os.path.abspath(ffMRI))
+    tmpfname, tmpext = os.path.splitext(fImg)
+    if tmpext == '.gz':
+        # the extension is .nii.gz
+        tmpfname, tmpext = os.path.splitext(tmpfname)
+    DirFeat = os.path.join(WorkDir, tmpfname+'.feat')
+    
+    # getting the feat model matrix
+    X = feat_model_matrix(fDesMat)
+
+    # writing out the matrix
+    fMatTxt = os.path.join(DirFeat, 'GLM_model.txt')
+    fMatNPZ = os.path.join(DirFeat, 'GLM_model.npz')
+    f = open(fMatTxt, 'w')
+    for iRow in X:
+        f.write('\t'.join(iRow))
+    f.close()
+    np.savez(fMatNPZ, X=X)
+    
+    # removing the temporary directory design_stats
+    com_rm = 'rm -rf ' + DirModel
+
+
+    
 
