@@ -77,12 +77,7 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     OutDir = os.path.join(WorkDir, 'design_stats') # temporary output directory
     if not os.path.exists(OutDir):  # if the output directory doesnt exist, make one
         os.makedirs(OutDir)
-    tmpfname, tmpext = os.path.splitext(fImg)
-    if tmpext == '.gz':
-        # the extension is .nii.gz
-        tmpfname, tmpext = os.path.splitext(tmpfname)
-    tmpfname = tmpfname + '_stats'
-    fDesFile = os.path.join(OutDir, 'design_' + tmpfname + '.fsf')
+    fDesFile = os.path.join(OutDir, 'design_stats.fsf')
 
     # MNI template location 
     DirFSL = os.environ['FSLDIR'] # getting the FSL directory from the environment variable
@@ -100,7 +95,6 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     DesFile.write("set fmri(featwatcher_yn) 0\n")
     DesFile.write("set fmri(sscleanup_yn) 0\n")
     # the output directory
-    OutDir = os.path.join(os.path.abspath(WorkDir), tmpfname)
     DesFile.write("set fmri(outputdir) \"%s\"" % OutDir)
     DesFile.write("\n")
     # the TR
