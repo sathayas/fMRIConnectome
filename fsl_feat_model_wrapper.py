@@ -318,7 +318,18 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
 
     
     Returns:
-          None
+          X:            An T x P array of the design matrix in an array. 
+                        T corresponds to the number of time points.
+                        P corresponds to the number of regressors. P equals 
+                        the number of EVs and their derivatives. Thus P is 
+                        twice the number of EVs.
+                        The column order is as follows:
+                             EV1   Column 0
+                             EV1'  Column 1
+                             EV2   Column 2
+                             EV2'  Column 3
+                             ....
+                        And so on. Here, (') denotes the derivative.
 
     
     Outputs:
@@ -358,12 +369,15 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     for iRow in X:
         strRow = [str(i) for i in iRow]
         f.write('\t'.join(strRow))
+        f.write('\n')
     f.close()
     np.savez(fMatNPZ, X=X)
     
     # removing the temporary directory design_stats
     com_rm = 'rm -rf ' + DirModel
+    res = os.system(com_rm)
 
-
+    # returning the design matrix itself too.
+    return X
     
 
