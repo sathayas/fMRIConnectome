@@ -346,11 +346,6 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     com_feat = 'feat_model ' + fDesFileBase
     res = os.system(com_feat)
     
-    # the directory and file business
-    DirModel, fName = os.path.split(os.path.abspath(fDesFile))
-    tmpPath, tmpExt = os.path.splitext(os.path.abspath(fDesFile))
-    fDesMat = tmpPath + '.mat'
-
     # the .feat directory
     WorkDir, fImg = os.path.split(os.path.abspath(ffMRI))
     tmpfname, tmpext = os.path.splitext(fImg)
@@ -358,6 +353,11 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
         # the extension is .nii.gz
         tmpfname, tmpext = os.path.splitext(tmpfname)
     DirFeat = os.path.join(WorkDir, tmpfname+'.feat')
+
+    # the directory and file business
+    DirModel, fName = os.path.split(os.path.abspath(fDesFile))
+    tmpPath, tmpExt = os.path.splitext(os.path.abspath(fDesFile))
+    fDesMat = tmpPath + '.mat'
     
     # getting the feat model matrix
     X = feat_model_matrix(fDesMat)
@@ -373,9 +373,9 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     f.close()
     np.savez(fMatNPZ, X=X)
     
-    # removing the temporary directory design_stats
-    com_rm = 'rm -rf ' + DirModel
-    res = os.system(com_rm)
+    # moving the stat model directory design_stats to the .feat directory
+    com_mv = 'mv ' + DirModel + ' ' + DirFeat 
+    res = os.system(com_mv)
 
     # returning the design matrix itself too.
     return X
