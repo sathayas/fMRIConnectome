@@ -356,7 +356,8 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     fMatNPZ = os.path.join(DirFeat, 'GLM_model.npz')
     f = open(fMatTxt, 'w')
     for iRow in X:
-        f.write('\t'.join(iRow))
+        strRow = [str(i) for i in iRow]
+        f.write('\t'.join(strRow))
     f.close()
     np.savez(fMatNPZ, X=X)
     
