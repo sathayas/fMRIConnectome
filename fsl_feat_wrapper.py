@@ -166,15 +166,23 @@ def make_feat_design(fT1_brain, ffMRI, nVolDel=0, bNorm=True):
     if bNorm:
         DesFile.write("set fmri(regstandard_yn) 1\n")
     else:
-        DesFile.write("set fmri(regstandard_yn) 0\n")
+        DesFile.write("set fmri(regstandard_yn) 1\n")  # even if normalization is off,
+                                                       # we try to center and re-orient
+                                                       # the structural to the template
+                                                       # using 6 DOF linear reg.
     DesFile.write("set fmri(alternateReference_yn) 0\n")
     # fsl's MNI template image
     DesFile.write("set fmri(regstandard) \"%s\"\n" % fMNI)
     # and more parameters ...
     DesFile.write("set fmri(regstandard_search) 90\n")
-    DesFile.write("set fmri(regstandard_dof) 12\n")
-    DesFile.write("set fmri(regstandard_nonlinear_yn) 1\n")
-    DesFile.write("set fmri(regstandard_nonlinear_warpres) 10\n")
+    if bNorm:  # if normalization is ON, then linear (12 dof) and non-linear
+        DesFile.write("set fmri(regstandard_dof) 12\n")
+        DesFile.write("set fmri(regstandard_nonlinear_yn) 1\n")
+        DesFile.write("set fmri(regstandard_nonlinear_warpres) 10\n")
+    else:  # if normalization is OFF, then linear (6 dof) only
+        DesFile.write("set fmri(regstandard_dof) 6\n")
+        DesFile.write("set fmri(regstandard_nonlinear_yn) 0\n")
+        DesFile.write("set fmri(regstandard_nonlinear_warpres) 10\n")        
     # highpass filter cutoff
     DesFile.write("set fmri(paradigm_hp) %.2f\n" % sHiPass)
     # number of voxels
