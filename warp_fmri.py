@@ -16,6 +16,12 @@ def apply_warp(featDir):
     filtered_func_data.nii.gz). Then the warped fMRI data will be written
     to the reg directory under the .feat directory, with the name
     func2standard.nii.gz.
+
+    This function can handle cases where
+    (1). The structural image has been normalized to the template space with
+         nonlinear and linear warp.
+    (2). The structural image has been centered and re-oriented but still in 
+         the native space, with 6 dof linear transformation only. 
     
     Input Parameters:
           featDir:    The .feat directory containing the warp parameters
@@ -30,16 +36,30 @@ def apply_warp(featDir):
     fwT1 = os.path.join(RegDir, 'highres2standard.nii.gz')
     # motion corrected 4D fMRI data
     mcfMRI = os.path.join(featDir, 'filtered_func_data.nii.gz')
-    # warp parameter for the fMRI data to the standard space
-    fwarp = os.path.join(RegDir, 'example_func2standard_warp.nii.gz')
     # output file name
     fout = os.path.join(RegDir, 'func2standard.nii.gz')
-    # finally calling applywarp from fsl
-    com_warp = 'applywarp --ref=' + fwT1 
-    com_warp += ' --in=' + mcfMRI 
-    com_warp += ' --out=' + fout
-    com_warp += ' --warp=' + fwarp
-    res = os.system(com_warp)
+    # warp parameters for the fMRI data to the standard space
+    fwarp = os.path.join(RegDir, 'example_func2standard_warp.nii.gz')
+    # check if nonlinear warping has been run. 
+    if os.path.isfile(fwarp):
+        # applying the linear and non-linear warp
+        #         NOTE: example_func2standard_warp file contains both
+        #               linear and nonlinear warp, created by the 
+        #               convertwarp command during FEAT.
+        com_warp = 'applywarp --ref=' + fwT1 
+        com_warp += ' --in=' + mcfMRI 
+        com_warp += ' --out=' + fout
+        com_warp += ' --warp=' + fwarp
+        res = os.system(com_warp)
+    else:
+        # applying the 6 dof linear trasformation only
+        fmat = os.path.join(RegDir, 'example_func2standard.mat')
+        com_warp = 'flirt -in ' + mcfMRI
+        com_warp += ' -ref ' + fwT1
+        com_warp += ' -out ' + fout
+        com_warp += ' -init ' + fmat
+        com_warp += ' -applyxfm'
+        res = os.system(com_warp)
 
 
 def reslice_fmri(ffMRI, img_dim, vox_sz):
