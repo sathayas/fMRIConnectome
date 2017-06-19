@@ -57,10 +57,9 @@ def reslice_to_fMRI(fBrain, ffMRI):
 def image_base(FeatDir):
     '''
     A function that checks whethere or not the structural image has been
-    normalized. If yes, the base file names for the normalized structural
-    and funcitonal images are returned. Otherwise, the base file names for
-    the structual and fuctional (registered to structural) images in 
-    the native space are returned. The output from this function are used
+    normalized. If yes, the base file name for the normalized structural
+    is returned. Otherwise, the base file name for the structual image in 
+    the native space is returned. The output from this function is used
     in various functions to create masks.
 
     Input Parameters:
@@ -70,8 +69,6 @@ def image_base(FeatDir):
     Returns:
           sBase:      The base file name (with path) of the structural MRI to be
                       used.
-          fBase:      The base file name (with path) of the functional MRI 
-                      (registered  to the structual) to be used.
 
     '''
     # directory and file names
@@ -82,14 +79,12 @@ def image_base(FeatDir):
     if os.path.isfile(sMRI):
         # the structural image has been normalized
         sBase = os.path.join(RegDir,'highres2standard')
-        fBase = os.path.join(RegDir, 'func2standard_r')
     else:
         # the structural image has not been normalized
         sBase = os.path.join(RegDir,'highres')
-        fBase = os.path.join(FeatDir,'filtered_func_data')
     
     # returning the base
-    return sBase, fBase
+    return sBase
 
 
 def mask_parenchyma(FeatDir):
@@ -107,12 +102,12 @@ def mask_parenchyma(FeatDir):
           _seg12_r.
     '''
     # directory and file names
-    sBase, fBase = image_base(FeatDir)
+    sBase = image_base(FeatDir)
     fseg1 = sBase + '_seg_1.nii.gz'
     fseg2 = sBase + '_seg_2.nii.gz'
     fout = sBase + '_seg_12.nii.gz'
     frout = sBase + '_seg_12_r.nii.gz'
-    ffmri = fBase + '.nii.gz'
+    ffmri = os.path.join(FeatDir, 'reg/func2standard_r.nii.gz')
 
     # then first, calling fslmaths to add seg1 and seg2 images
     com_fslmaths = 'fslmaths ' + fseg1
@@ -144,12 +139,12 @@ def mask_wm(FeatDir):
           _seg2_ee_r.
     '''
     # directory and file names
-    sBase, fBase = image_base(FeatDir)
+    sBase  = image_base(FeatDir)
     fseg2 = sBase + '_seg_2.nii.gz'
     fseg2_e = sBase + '_seg_2_e.nii.gz'
     fseg2_ee = sBase + '_seg_2_ee.nii.gz'
     fseg2_ee_r = sBase + '_seg_2_ee_r.nii.gz'
-    ffmri = fBase + '.nii.gz'
+    ffmri = os.path.join(FeatDir, 'reg/func2standard_r.nii.gz')
 
     # then first, calling fslmaths to erode the white matter image
     com_ero1 = 'fslmaths ' + fseg2
@@ -181,10 +176,10 @@ def mask_csf(FeatDir):
           _seg0_r.
     '''
     # directory and file names
-    sBase, fBase = image_base(FeatDir)
+    sBase = image_base(FeatDir)
     fseg0 = sBase + '_seg_0.nii.gz'
     fseg0_r = sBase + '_seg_0_r.nii.gz'
-    ffmri = fBase + '.nii.gz'
+    ffmri = os.path.join(FeatDir, 'reg/func2standard_r.nii.gz')
 
     # reslice the csf mask image to the fMRI space
     res = reslice_to_fMRI(fseg0, ffmri)
@@ -210,10 +205,10 @@ def mask_brain(FeatDir, fMask=""):
     '''
     # directory and file names
     RegDir = os.path.join(FeatDir, 'reg')
-    sBase, fBase = image_base(FeatDir)
+    sBase = image_base(FeatDir)
     fT1 = sBase + '.nii.gz'
     fT1_bin = sBase + '_bin.nii.gz'
-    ffmri = fBase + '.nii.gz'
+    ffmri = os.path.join(RegDir, 'func2standard_r.nii.gz')
     fIntersect = os.path.join(RegDir, 'mask_brain.nii.gz')
 
     # threshold the T1 image
@@ -274,8 +269,7 @@ def mask_fmri(FeatDir):
 
     # directory and file names
     RegDir = os.path.join(FeatDir, 'reg')
-    sBase, fBase = image_base(FeatDir)
-    ffmri = fBase + '.nii.gz'
+    ffmri = os.path.join(RegDir, 'func2standard_r.nii.gz')
     fbrain = os.path.join(RegDir, 'mask_brain.nii.gz')
     fmask = os.path.join(RegDir, 'mask_fmri.nii.gz')
     # loading the image data
