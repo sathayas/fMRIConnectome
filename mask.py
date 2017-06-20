@@ -136,7 +136,7 @@ def mask_wm(FeatDir):
     
     Output:
           This function generates a white matter mask image with the suffix 
-          _seg2_ee_r.
+          _seg_2_ee_r.
     '''
     # directory and file names
     sBase  = image_base(FeatDir)
@@ -183,6 +183,44 @@ def mask_csf(FeatDir):
 
     # reslice the csf mask image to the fMRI space
     res = reslice_to_fMRI(fseg0, ffmri)
+
+
+
+def mask_gm(FeatDir, rSphere=2):
+    '''
+    The function to create a gray matter mask based on segmented image. The
+    GM segmentation image is resliced to the fMRI voxel size.
+
+    This function dilates the gray matter segmentation, then reslice
+    the resulting image to the same voxel size as the fMRI data.
+
+    Input parameters:
+          FeatDir:    The .feat directory where segmentation results reside.
+          rSphere:    The radius of the dilation sphere in mm. The default is
+                      2 mm.
+
+    Returns:
+          NONE:
+    
+    Output:
+          This function generates a GM mask image with the suffix 
+          _seg_1_d_r.
+    '''
+    # directory and file names
+    sBase  = image_base(FeatDir)
+    fseg1 = sBase + '_seg_1.nii.gz'
+    fseg1_d = sBase + '_seg_1_d.nii.gz'
+    fseg1_d_r = sBase + '_seg_1_d_r.nii.gz'
+    ffmri = os.path.join(FeatDir, 'reg/func2standard_r.nii.gz')
+
+    # then first, calling fslmaths to erode the gray matter image
+    com_dil = 'fslmaths ' + fseg1
+    #com_dil += ' -kernel sphere ' + str(rSphere)
+    com_dil += ' -dilD ' + fseg1_d
+    res = os.system(com_dil)
+
+    # then reslice the resulting mask image to the fMRI space
+    res = reslice_to_fMRI(fseg1_d, ffmri)
 
 
 
