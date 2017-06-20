@@ -8,7 +8,7 @@ import os
 import numpy as np
 import nibabel as nib
 
-def regress_global(FeatDir):
+def regress_global(FeatDir, X=[]):
     '''
     regressing out the motion time course and mean time courses
     from the fMRI time series data. 
@@ -24,6 +24,10 @@ def regress_global(FeatDir):
                             -The mask image describing the pertinent voxels
                              to be included in the connectivity analysis
                                   (mask_fmri.nii.gz under reg).
+          X:           Additional covariates to be regressed out from the fMRI
+                       data. The X has to be a 2D array with T x P, where T
+                       is the number of time points (same as the fMRI data) and 
+                       P is the number of covariates (one column per covariate).
 
     returns:
           NONE
@@ -51,8 +55,10 @@ def regress_global(FeatDir):
     # reading mean time courses
     infile = np.load(fPhysPar)
     PhysPar = infile['PhysPar']
-    # concatenating both parameters and centering
-    M = np.column_stack((MoPar, PhysPar))
+    # concatenating parameters and centering
+    M = np.hstack((MoPar, PhysPar))
+    if len(X)>0:
+        M = np.hstack((M, X))
     cM = M - np.ones([NScan, 1])*(np.sum(M, axis=0)/NScan)
     # loading the image data
     img_data = nib.load(ffmri)
