@@ -57,12 +57,6 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
                         Each element is a file name, with an absolute path.
           nVolDel:      The number of first volumes to be deleted.
                         The default is 0. 
-
-          Since the main goal of this function is to create a design file for 
-          a GLM model, the only relevant information is the list of EV timing
-          information files. All the other information is used as place holders
-          in the design file, and does not affect the GLM model.
-
     
     Returns:
           fDes:         The design file name
@@ -74,7 +68,11 @@ def make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0):
 
     # file name business to figure out the location of the temporary design file
     WorkDir, fImg = os.path.split(os.path.abspath(ffMRI))
-    OutDir = os.path.join(WorkDir, 'design_stats') # temporary output directory
+    tmpfname, tmpext = os.path.splitext(fImg)
+    while tmpext != '':   # getting rid of all extensions
+        tmpfname, tmpext = os.path.splitext(tmpfname)
+    FeatDir = os.path.join(WorkDir, tmpfname+'.feat')
+    OutDir = os.path.join(FeatDir, 'design_stats') # temporary output directory
     if not os.path.exists(OutDir):  # if the output directory doesnt exist, make one
         os.makedirs(OutDir)
     fDesFile = os.path.join(OutDir, 'design_stats.fsf')
@@ -335,7 +333,7 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     '''
 
     # creating the design file and running it
-    fDesFile = make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel=0)
+    fDesFile = make_feat_model_design(fT1_brain, ffMRI, EVFileList, nVolDel)
     fDesFileBase, fDesFileExt = os.path.splitext(fDesFile)
     com_feat = 'feat_model ' + fDesFileBase
     res = os.system(com_feat)
@@ -366,10 +364,6 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
         f.write('\n')
     f.close()
     np.savez(fMatNPZ, X=X)
-    
-    # moving the stat model directory design_stats to the .feat directory
-    com_mv = 'mv ' + DirModel + ' ' + DirFeat 
-    res = os.system(com_mv)
 
     # returning the design matrix itself too.
     return X
