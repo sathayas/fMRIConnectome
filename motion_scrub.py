@@ -87,9 +87,17 @@ def scrub_motion(FeatDir, FDTh=0.5):
     MCDir = os.path.join(FeatDir, 'mc')
     ffmri = os.path.join(RegDir, 'func2standard_r_bp_reg.nii.gz')
     fout = os.path.join(RegDir, 'func2standard_r_bp_reg_ms.nii.gz')
+    fGLMnpz = os.path.join(FeatDir, 'GLM_model.npz')
+    fGLMnpz_out = os.path.join(FeatDir, 'GLM_model_ms.npz')
+    fGLMtxt_out = os.path.join(FeatDir, 'GLM_model_ms.txt')
     ftmpBase = os.path.join(MCDir, 'vol')
     fTimeMask = os.path.join(MCDir, 'TimeMask.npz')
     fTimeMasktxt = os.path.join(MCDir, 'TimeMask.par')
+
+    # if the GLM model exists, it is read
+    if os.path.isfile(fGLMnpz):
+        infile = np.load(fGLMnpz)
+        X = infile['X']
 
     # calculating FD
     FD = calc_fd(FeatDir)
@@ -114,6 +122,17 @@ def scrub_motion(FeatDir, FDTh=0.5):
         TMfile.write("%.5f     " % tmpFD[iFrame])
         TMfile.write("%d\n" % TimeMask[iFrame])
     TMfile.close()
+
+    # motion scrubbing the GLM
+    if os.path.isfile(fGLMnpz):
+        X = X[np.nonzero(TimeMask==1)[0], :]
+        np.savez(fGLMnpz_out, X=X)
+        f = open(fGLMtxt_out, 'w')
+        for iRow in X:
+            strRow = [str(i) for i in iRow]
+            f.write('\t'.join(strRow))
+            f.write('\n')
+        f.close()
 
     # splitting the input image
     com_split = 'fslsplit ' + ffmri + ' ' + ftmpBase + ' -t'
