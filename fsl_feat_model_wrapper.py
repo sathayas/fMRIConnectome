@@ -369,3 +369,30 @@ def run_feat_model(fT1_brain, ffMRI, EVFileList, nVolDel=0):
     return X
     
 
+def GLM_column(featDir, colInd):
+    '''
+    Returns a particular column of a GLM model matrix.
+
+    Input Parameters:
+          featDir:     The .feat directory where the GLM model file exists.
+                       If the motion scrubbed version of the GLM (GLM_model_ms.npz)
+                       exists, then it is used to produce the output. Otherwise,
+                       the original version of the GLM (GLM_model.npz) is used.
+          colInd:      The column index indicating the column to be returned. As in
+                       the typical Python convention, 0 corresponds to the first column.
+
+    Returns:
+          Y:           A 1D array from the GLM design matrix.
+    '''
+    # file business
+    fGLM = os.path.join(featDir, 'GLM_model.npz')
+    fGLM_ms = os.path.join(featDir, 'GLM_model_ms.npz')
+    # loading the appropriate file
+    if os.path.isfile(fGLM_ms):
+        infile = np.load(fGLM_ms)
+    else:
+        infile = np.load(fGLM)
+    # and extracting the column
+    X = infile['X']
+    Y = X[:,colInd]
+    return Y
