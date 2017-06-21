@@ -134,11 +134,40 @@ def load_data(FeatDir):
     return Y, indMaskV
 
 
+def mask_ts(x, ts):
+    '''
+    A function to mask the data matrix with a time series with zero-values.
+    The data matrix is T x V, where T is the number of scans and V is the 
+    number of withing-mask voxels. The time series ts, a 1D array of length T,
+    may have some zeros. This function eliminates time points from the data
+    matrix where ts=0. Moreover, the data matrix is multiplied non-zero values
+    of ts.
 
-def run_crosscorr(FeatDir, Th=0.3, PosOnly=0):
+    Input Parameters:
+          x:        An array of size T x V, where T is the number of
+                    time points and V is the number of voxels.
+          ts:       A 1D array of length T. Some elements may be zero.
+
+    Returns:
+          y:        An array of size U x V, where U<T or U=T. This is
+                    the data array masked by the time series ts. time 
+                    points corresponding ts=0 are eliminated. The remaining
+                    time points are weighted by the value of ts.
+    '''
+    # first, eliminate zero elements from x and ts
+    tsNZ = ts[np.nonzero(ts)]
+    xNZ = x[np.nonzero(ts)[0],:]
+    # multiplying the data with ts by broadcasting
+    y = xNZ * np.array([tsNZ]).T  
+    # and returning the masked data
+    return y
+
+
+def run_crosscorr(FeatDir, Th=0.3, PosOnly=0, ts=[]):
     '''
     the wrapper function to calculate the cross correlaiton matrix
-    and saves it.
+    and saves it. If a time series is provided as a 1D array, the 
+    fMRI time series data is masked by that time series.
 
     input parameters:
           FeatDir:  The .feat directory containing the fMRI data that has
@@ -155,6 +184,8 @@ def run_crosscorr(FeatDir, Th=0.3, PosOnly=0):
                         PosOnly=1:    Only positive correlations are retained
                         PosOnly=-1:   Only negative correlations are retained
                                       (with R<-Th)
+          ts:       A 1D array of length T. Some elements may be zero.
+
 
     returns:
           NONE
@@ -183,7 +214,11 @@ def run_crosscorr(FeatDir, Th=0.3, PosOnly=0):
     # loading the image data
     X, indMaskV = load_data(FeatDir)
     # calculating the cross correlation
-    R = calc_crosscorr(X)
+    if len(ts)==0:
+        R = calc_crosscorr(X)
+    else:
+        Y = mask_ts(X, ts)
+        R = calc_crosscorr(Y)
     # compacting the correlation matrix
     thR = pack_thresh(R, Th, PosOnly)
     R = []
