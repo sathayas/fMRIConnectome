@@ -56,6 +56,9 @@ def scrub_motion(FeatDir, FDTh=0.5):
     the function to remove volumes based on FD. The FD is calculated by
     calling calc_fd function.
 
+    If the GLM model also exists, then the GLM model time series is also motion
+    scrubbed. 
+
     input parameters:
           FeatDir:      The .feat directory containing the high-res T1 image
                         normalized to the template space. The motion parameters
@@ -72,6 +75,10 @@ def scrub_motion(FeatDir, FDTh=0.5):
     outputs:
           This function writes out the following:
                 -Motion scrubbed fMRI data (with _ms suffix)
+                -Motion scrubbed GLM model, if exists. The motion scrubbed
+                 GLM files are written as:
+                      -GLM_model_ms.npz (numpy array)
+                      -GLM_model_ms.txt (text file)
                 -FD time series (see calc_fd function for more details)
                 -Time series masks, with deleted time points indicated by
                  zeros.
