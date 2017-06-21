@@ -262,6 +262,9 @@ def feat_model_matrix(fMatFile):
                         And so on. Here, (') denotes the derivative.
 
     '''
+    # parameters
+    eSmall = 0.0001  # a very small number
+
     # open the file
     f = open(fMatFile, 'r')
     
@@ -288,6 +291,7 @@ def feat_model_matrix(fMatFile):
 
     # now rectifying the matrix
     DesMat[DesMat<0] = 0
+    DesMat[DesMat<eSmall] = 0  # zeroing small very values
 
     # and returning the matrix
     return DesMat
