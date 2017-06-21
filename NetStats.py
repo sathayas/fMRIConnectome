@@ -392,6 +392,44 @@ def sort_nodestat(NodeList, Stats):
     return sNodeList, sStats
 
 
+def calc_all(fNet, fOut):
+    '''
+    A function to calculate all network stats and write them
+    out to a file.
+
+    Input Parameters:
+          fNet:       the adjacency list filename for the network
+          fOut:       the output file name for the network stats
+
+    Returns:
+          None
+
+    Output:
+          This function writes all network stats to a single .npz file
+          specified in fOut.
+
+    '''
+    #
+    # loading the network
+    G = nx.read_adjlist(fNet, nodetype=int)
+    # caluclating stats
+    # L, D, Eglob
+    L, D, GC, Eglob, Eglobi, Nodes = calc_LDEglob_net(G)
+    # Eloc
+    # Note: Disabled since calculation of Eloc is inefficienct
+    #       and node-wise clustering coefficient can describe
+    #       similar info as Eloc
+    #Eloc, Eloci, ElocNodes = NetStats.eloc_net(G)
+    #
+    # C
+    C, Ci, CiNodes = calc_C(G)
+    # Degree
+    K, Ki, KiNodes = degree_node(G)
+    # Writing out the netstats
+    np.savez(fOut, L=L, C=C, D=D, K=K, GC=GC, Eglob=Eglob,
+             Ki=Ki, Eglobi=Eglobi, Ci=Ci, Nodes=Nodes)
+
+
 def write_nodestat_nii(NodeList, Stats, fHDR, fOut):
     '''
     A function to write out node stats as an image
