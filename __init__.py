@@ -18,7 +18,7 @@ from .NetStats import eglob_node, eglob_net, calc_L, calc_C, calc_D
 from .NetStats import calc_LDEglob_node, calc_LDEglob_subnet, calc_LDEglob_net
 from .NetStats import subgraph, eloc_node, eloc_net, GCSize, degree_node
 from .NetStats import write_nodestat_nii, calc_all
-from .net_modules import run_Louvain
+from .net_modules import run_Louvain, extract_mod_ts
 from .ROINetUtil import extract_roits
 from .fsl_feat_model_wrapper import make_feat_model_design, run_feat_model
 from .fsl_feat_model_wrapper import feat_model_matrix, GLM_column
