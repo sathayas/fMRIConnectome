@@ -173,6 +173,11 @@ def run_crosscorr(FeatDir, Th=0.3, PosOnly=0, ts=[]):
           FeatDir:  The .feat directory containing the fMRI data that has
                     been normalized, resliced, band-pass filtered,
                     regressed, and motion-scrubbed.
+                      **There is a hidden functionality associated with this
+                        parameter. Instead of providing a .feat directory name,
+                        the user can provide the directory where the correlation
+                        information will be stored. The only catch is that this 
+                        directory has to be somewhere under the .feat directory.
           Th:       A threshold to eliminate small correlation values.
                         For positive elements, R>Th
                         For negative elements, R<-Th (if PosOnly=0)
@@ -199,12 +204,27 @@ def run_crosscorr(FeatDir, Th=0.3, PosOnly=0, ts=[]):
                     -corrmat_xyz.npz     The voxel indices for the correlation matrix.
                                          The order of the voxels is the same as the
                                          row / column of the correaltion matrix.
+              **If a correlation matrix directory is provided as the FeatDir parameter
+                instead of the actual .feat directory, then the correlation matrix
+                information described above will be stored in that directory instead
+                of the default CorrMat directory.
 
     '''
-
+    # checking to see if FeatDir is actually a .feat directory
+    tmpPath, tmpExt = os.path.splitext(FeatDir)
+    if tmpExt != '.feat':
+        CorrDir = FeatDir  # the input is the correlation info directory
+        while True:  # finding the actual .feat directory, one directory up at a time
+            FeatDir, tmpFName = os.path.split(FeatDir)
+            tmpPath, tmpExt = os.path.splitext(FeatDir)
+            if tmpExt == '.feat':
+                break
+    else:
+        # the input is a .feat directory
+        CorrDir = os.path.join(FeatDir, 'CorrMat') 
+        
     # directory and file names
     RegDir = os.path.join(FeatDir, 'reg')
-    CorrDir = os.path.join(FeatDir, 'CorrMat')
     fCorrMat = os.path.join(CorrDir, 'corrmat_csr.npz')
     fCorrXYZ = os.path.join(CorrDir, 'corrmat_xyz.npz')
     # creating the output directory
