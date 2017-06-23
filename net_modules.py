@@ -69,3 +69,46 @@ def run_Louvain(fNet, fMask, fOutImg, fOutInfo):
     # writing out module stats
     np.savez(fOutInfo, Q=Q, NMods=NMods, ModID=ModID, NNodes=NNodes)
 
+
+def extract_mod_ts(fModImg, ffMRI):
+    '''
+    A function to extract module time course.
+
+    Input Parameters:
+          fModImg:    The modular parcellation image. Each module is denoted by
+                      a distinct voxel value.
+          ffMRI:      The fMRI time course data. It has to be in the same space as
+                      the module image.
+
+    Returns:
+          tsMat:      A 2D array of size T x M, where T corresponds to the number of
+                      time points, and M corresponds to the number of modules.
+          modInd:     A 1D array of the module number, in the same order of columns
+                      as tsMat.
+    
+    '''
+    # first, reading in the image data
+    img_mod = nib.load(fModImg)
+    X_mod = img_mod.get_data().astype(int)
+    img_fMRI = nib.load(ffMRI)
+    X_fMRI = img_fMRI.get_data()
+    # get dimension info from data
+    nMod = X_mod.max()
+    nT = X_fMRI.shape[-1]
+    # initializing the output matrix
+    tsMat = np.zeros((nT, nMod))
+    modInd = np.zeros(nMod)
+    # loop over modules
+    for iMod in range(nMod):
+        # loop over time points
+        modInd[iMod] = iMod+1
+        for iT in range(nT):
+            tmpfMRI = X_fMRI[:,:,:,iT]
+            modMean = tmpfMRI[X_mod==iMod+1].mean()
+            tsMat[iT, iMod] = modMean
+    # returning the time series and module index
+    return tsMat, modInd
+
+    
+            
+    
